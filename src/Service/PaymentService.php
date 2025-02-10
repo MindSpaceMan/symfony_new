@@ -7,7 +7,7 @@ use App\Payment\PaymentProcessorInterface;
 
 class PaymentService
 {
-    public function __construct(private PaymentProcessorInterface $paymentProcessor)
+    public function __construct(private readonly PaymentProcessorInterface $paymentProcessor)
     {
     }
 

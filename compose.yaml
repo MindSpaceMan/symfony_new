@@ -14,6 +14,18 @@ services:
       # - ./docker/db/data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
 
+  sio_test:
+    user: app
+    build:
+      context: .
+      args:
+        USER_ID: ${USER_ID:-1000}
+    ports:
+      - "8337:8337"
+    volumes:
+      - .:/app:rw
+    environment:
+      - APP_ENV=dev
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:

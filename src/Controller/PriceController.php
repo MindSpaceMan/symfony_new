@@ -1,18 +1,17 @@
 <?php
 
-// src/Controller/PriceController.php
 namespace App\Controller;
 
 use App\DTO\CalculatePriceRequest;
 use App\DTO\PurchaseRequest;
-use App\Repository\ProductRepository;
 use App\Repository\CouponRepository;
-use App\Service\PriceCalculator;
+use App\Repository\ProductRepository;
 use App\Service\PaymentService;
+use App\Service\PriceCalculator;
+use OpenApi\Annotations as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PriceController extends AbstractController
@@ -23,7 +22,35 @@ class PriceController extends AbstractController
         private PriceCalculator $priceCalculator
     ) {}
 
-    #[Route('/calculate-price', name: 'calculate_price', methods: ['POST'])]
+    /**
+     * @OA\Post(
+     *   summary="Рассчитать итоговую цену",
+     *   description="Принимает данные о продукте, налоговом номере и купоне. Возвращает финальную цену.",
+     *   @OA\RequestBody(
+     *       description="Данные для расчёта цены",
+     *       required=true,
+     *       @OA\JsonContent(ref=@Model(type=CalculatePriceRequest::class))
+     *   ),
+     *   @OA\Response(
+     *       response=200,
+     *       description="Успешный расчёт",
+     *       @OA\JsonContent(
+     *           type="object",
+     *           @OA\Property(property="finalPrice", type="number", format="float")
+     *       )
+     *   ),
+     *   @OA\Response(
+     *       response=400,
+     *       description="В случае ошибки валидации или неверных данных",
+     *       @OA\JsonContent(
+     *           type="object",
+     *           @OA\Property(property="errors", type="object")
+     *       )
+     *   )
+     * )
+     *
+     * @OA\Tag(name="Price")
+     */
     public function calculatePrice(Request $request, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true) ?? [];
@@ -38,13 +65,11 @@ class PriceController extends AbstractController
             return $this->json(['errors' => $this->formatErrors($errors)], 400);
         }
 
-        // Проверка продукта
         $product = $this->productRepo->find($dto->getProduct());
         if (!$product) {
             return $this->json(['errors' => ['product' => 'Product not found']], 400);
         }
 
-        // Проверка купона
         $coupon = null;
         if ($dto->getCouponCode()) {
             $coupon = $this->couponRepo->findOneBy(['code' => $dto->getCouponCode()]);
@@ -57,7 +82,35 @@ class PriceController extends AbstractController
         return $this->json(['finalPrice' => $finalPrice], 200);
     }
 
-    #[Route('/purchase', name: 'purchase', methods: ['POST'])]
+    /**
+     * @OA\Post(
+     *   summary="Совершить покупку",
+     *   description="Принимает данные о продукте, налоговом номере, купоне, способе оплаты. Возвращает итоговую цену и статус оплаты.",
+     *   @OA\RequestBody(
+     *       required=true,
+     *       @OA\JsonContent(ref=@Model(type=PurchaseRequest::class))
+     *   ),
+     *   @OA\Response(
+     *       response=200,
+     *       description="Покупка прошла успешно",
+     *       @OA\JsonContent(
+     *           type="object",
+     *           @OA\Property(property="status", type="string"),
+     *           @OA\Property(property="finalPrice", type="number", format="float")
+     *       )
+     *   ),
+     *   @OA\Response(
+     *       response=400,
+     *       description="Оплата не прошла или ошибка входных данных",
+     *       @OA\JsonContent(
+     *           type="object",
+     *           @OA\Property(property="errors", type="object")
+     *       )
+     *   )
+     * )
+     *
+     * @OA\Tag(name="Price")
+     */
     public function purchase(
         Request $request,
         ValidatorInterface $validator,
@@ -107,10 +160,13 @@ class PriceController extends AbstractController
             return $this->json(['errors' => ['payment' => 'Payment failed']], 400);
         }
 
-        return $this->json(['status' => 'success', 'finalPrice' => $finalPrice], 200);
+        return $this->json([
+            'status' => 'success',
+            'finalPrice' => $finalPrice
+        ], 200);
     }
 
-    private function formatErrors($errors): array
+    private function formatErrors(iterable $errors): array
     {
         $res = [];
         foreach ($errors as $error) {

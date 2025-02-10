@@ -10,55 +10,55 @@ class PurchaseRequest
 {
     #[Assert\NotBlank]
     #[Assert\Type('integer')]
-    private mixed $product;
+    private int $product;
 
     #[Assert\NotBlank]
     #[ValidTaxNumber]
-    private mixed $taxNumber;
+    private string $taxNumber;
 
     #[Assert\Type('string')]
-    private mixed $couponCode;
+    private ?string $couponCode = null;
 
     #[Assert\NotBlank]
-    #[Assert\Choice(choices: ['paypal', 'stripe'])]
-    private mixed $paymentProcessor;
+    #[Assert\Choice(choices: ['paypal', 'stripe'], message: 'Unknown payment processor')]
+    private string $paymentProcessor;
 
-    public function getProduct(): mixed
+    public function getProduct(): int
     {
         return $this->product;
     }
 
-    public function setProduct(mixed $product): void
+    public function setProduct(int $product): void
     {
         $this->product = $product;
     }
 
-    public function getTaxNumber(): mixed
+    public function getTaxNumber(): string
     {
         return $this->taxNumber;
     }
 
-    public function setTaxNumber(mixed $taxNumber): void
+    public function setTaxNumber(string $taxNumber): void
     {
         $this->taxNumber = $taxNumber;
     }
 
-    public function getCouponCode(): mixed
+    public function getCouponCode(): ?string
     {
         return $this->couponCode;
     }
 
-    public function setCouponCode(mixed $couponCode): void
+    public function setCouponCode(?string $couponCode): void
     {
         $this->couponCode = $couponCode;
     }
 
-    public function getPaymentProcessor(): mixed
+    public function getPaymentProcessor(): string
     {
         return $this->paymentProcessor;
     }
 
-    public function setPaymentProcessor(mixed $paymentProcessor): void
+    public function setPaymentProcessor(string $paymentProcessor): void
     {
         $this->paymentProcessor = $paymentProcessor;
     }

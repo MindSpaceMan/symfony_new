@@ -8,7 +8,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class ValidTaxNumberValidator extends ConstraintValidator
 {
-    public function validate(mixed $value, Constraint $constraint)
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (null === $value || '' === $value) {
             return;

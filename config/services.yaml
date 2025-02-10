@@ -34,13 +34,13 @@ services:
         arguments:
             $stripeProcessor: '@Systemeio\TestForCandidates\StripePaymentProcessor'
 
-    # PaymentService для PayPal
     App\Service\PaymentService $paymentServicePaypal:
+        class: App\Service\PaymentService
         arguments:
             $paymentProcessor: '@App\Payment\PaypalPaymentProcessorAdapter'
 
-    # PaymentService для Stripe
     App\Service\PaymentService $paymentServiceStripe:
+        class: App\Service\PaymentService
         arguments:
             $paymentProcessor: '@App\Payment\StripePaymentProcessorAdapter'
 

@@ -3,6 +3,7 @@
 #        path: ../src/Controller/
 #        namespace: App\Controller
 #    type: attribute
+
 calculate_price:
     path: /calculate-price
     controller: App\Controller\PriceController::calculatePrice

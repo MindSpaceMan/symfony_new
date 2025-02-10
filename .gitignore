@@ -1,3 +1,5 @@
+# Ignore .idea folder
+/.idea
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -23,3 +25,13 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+# Ignore node_modules if needed
+/node_modules/
+
+# Ignore build artifacts
+/build/
+
+# Docker artifacts
+/docker-compose.override.yml
+
+# etc.

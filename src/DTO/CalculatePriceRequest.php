@@ -19,9 +19,6 @@ class CalculatePriceRequest
     #[Assert\Type('string')]
     private ?string $couponCode = null;
 
-    #[Assert\NotBlank]
-    #[Assert\Choice(choices: ['paypal', 'stripe'], message: 'Unknown payment processor')]
-    private string $paymentProcessor;
 
     public function getProduct(): int
     {
@@ -51,16 +48,6 @@ class CalculatePriceRequest
     public function setCouponCode(?string $couponCode): void
     {
         $this->couponCode = $couponCode;
-    }
-
-    public function getPaymentProcessor(): string
-    {
-        return $this->paymentProcessor;
-    }
-
-    public function setPaymentProcessor(string $paymentProcessor): void
-    {
-        $this->paymentProcessor = $paymentProcessor;
     }
 
 }

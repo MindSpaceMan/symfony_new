@@ -5,7 +5,10 @@ namespace App\Tests\Service;
 use App\Entity\Coupon;
 use App\Entity\Product;
 use App\Service\PriceCalculator;
+use Brick\Math\Exception\RoundingNecessaryException;
 use PHPUnit\Framework\TestCase;
+use Brick\Math\RoundingMode;
+use Brick\Money\Money;
 
 class PriceCalculatorTest extends TestCase
 {
@@ -27,8 +30,8 @@ class PriceCalculatorTest extends TestCase
             ->setPrice(100);
 
         $finalPrice = $this->calculator->calculatePrice($product, null, 'XX123');
-        // Без купона и неизвестный налог -> цена = 100
-        $this->assertEquals(100.0, $finalPrice);
+
+        $this->assertSame(100.0, $finalPrice->getAmount()->toFloat(), 'Цена должна остаться без изменений.');
     }
 
     /**
@@ -41,13 +44,14 @@ class PriceCalculatorTest extends TestCase
             ->setPrice(100);
 
         $finalPrice = $this->calculator->calculatePrice($product, null, 'DE123456789');
-        // Цена = 100 + 19% = 119
-        $this->assertEquals(119.0, $finalPrice);
+
+        $this->assertSame(119.0, $finalPrice->getAmount()->toFloat(), 'Цена должна быть 119€ (100€ + 19%).');
     }
 
     /**
      * Проверяем применение фиксированной скидки (coupon = "D15") на продукт
      * и налог в Италии (22%)
+     * @throws RoundingNecessaryException
      */
     public function testCalculatePrice_FixedDiscount_Italy(): void
     {
@@ -62,8 +66,10 @@ class PriceCalculatorTest extends TestCase
             ->setValue(15);
 
         $finalPrice = $this->calculator->calculatePrice($product, $coupon, 'IT12345678900');
+
         // Изначально 100 - 15 = 85, затем налог 22% -> 85 + 85*0.22 = 103.7
-        $this->assertEquals(103.70, $finalPrice);
+        $expected = Money::of(103.7, 'EUR')->getAmount()->toScale(2, RoundingMode::HALF_UP)->toFloat();
+        $this->assertSame($expected, $finalPrice->getAmount()->toFloat(), 'Ожидаемая цена: 103.70€.');
     }
 
     /**
@@ -71,18 +77,14 @@ class PriceCalculatorTest extends TestCase
      */
     public function testCalculatePrice_PercentDiscount_Greece(): void
     {
-        $product = (new Product())
-            ->setName('Headphones')
-            ->setPrice(20);
+        $product = (new Product())->setName('Headphones')->setPrice(20);
 
-        $coupon = (new Coupon())
-            ->setCode('P10')
-            ->setDiscountType('percent')
-            ->setValue(10);
+        $coupon = (new Coupon())->setCode('P10')->setDiscountType('percent')->setValue(10);
 
         $finalPrice = $this->calculator->calculatePrice($product, $coupon, 'GR123456789');
-        // Базовая цена 20, скидка 10% -> 18, + 24% налог = 18 + 18*0.24 = 22.32
-        $this->assertEquals(22.32, $finalPrice);
+
+        $expected = Money::of(22.32, 'EUR')->getAmount()->toScale(2, RoundingMode::HALF_UP)->toFloat();
+        $this->assertSame($expected, $finalPrice->getAmount()->toFloat(), 'Ожидаемая цена: 22.32€.');
     }
 
     /**
@@ -90,17 +92,20 @@ class PriceCalculatorTest extends TestCase
      */
     public function testCalculatePrice_100PercentCoupon(): void
     {
-        $product = (new Product())
-            ->setName('Case')
-            ->setPrice(10);
+        $product = (new Product())->setName('Case')->setPrice(10);
 
-        $coupon = (new Coupon())
-            ->setCode('P100')
-            ->setDiscountType('percent')
-            ->setValue(100);
+        $coupon = (new Coupon())->setCode('P100')->setDiscountType('percent')->setValue(100);
 
         $finalPrice = $this->calculator->calculatePrice($product, $coupon, 'DE123456789');
         // 10 -> скидка 100% -> 0, налог DE: 19% от 0 = 0
-        $this->assertEquals(0.0, $finalPrice);
+        $this->assertSame(0.0, $finalPrice->getAmount()->toFloat(), 'Цена после 100% скидки должна быть 0€.');
+    }
+
+    public function testCalculatePrice_UnknownTaxNumber(): void
+    {
+        $product = (new Product())->setName('Case')->setPrice(10);
+
+        $this->expectException(\DomainException::class);
+        $this->calculator->calculatePrice($product, null, 'UNKNOWN');
     }
 }

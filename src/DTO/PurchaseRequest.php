@@ -7,40 +7,22 @@ use App\Enum\PaymentProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints\ValidTaxNumber;
 
-final class PurchaseRequest
+final readonly class PurchaseRequest
 {
-    #[Assert\NotBlank]
-    #[Assert\Type('integer')]
-    private int $product;
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Type('integer')]
+        public int     $product,
 
-    #[Assert\NotBlank]
-    #[ValidTaxNumber]
-    private string $taxNumber;
+        #[Assert\NotBlank]
+        #[ValidTaxNumber]
+        public string  $taxNumber,
 
-    #[Assert\Type('string')]
-    private ?string $couponCode = null;
+        #[Assert\Type('string')]
+        public ?string $couponCode,
 
-    #[Assert\NotBlank]
-    #[Assert\Choice(callback: [PaymentProcessor::class, 'values'], message: 'Unknown payment processor')]
-    private string $paymentProcessor;
-
-    public function getProduct(): int
-    {
-        return $this->product;
-    }
-
-    public function getTaxNumber(): string
-    {
-        return $this->taxNumber;
-    }
-
-    public function getCouponCode(): ?string
-    {
-        return $this->couponCode;
-    }
-
-    public function getPaymentProcessor(): string
-    {
-        return $this->paymentProcessor;
-    }
+        #[Assert\NotBlank]
+        #[Assert\Choice(callback: [PaymentProcessor::class, 'values'], message: 'Unknown payment processor')]
+        public string $paymentProcessor
+    ) {}
 }

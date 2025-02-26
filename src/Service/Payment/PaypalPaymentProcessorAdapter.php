@@ -1,18 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Payment;
+namespace App\Service\Payment;
 
 use Psr\Log\LoggerInterface;
 use Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor;
+
 final class PaypalPaymentProcessorAdapter implements PaymentProcessorInterface
 {
-    private LoggerInterface $logger;
-
-    public function __construct(private PaypalPaymentProcessor $paypalProcessor, LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
+    public function __construct(
+        private readonly PaypalPaymentProcessor $paypalProcessor,
+        private readonly LoggerInterface $logger)
+    {}
 
     /**
      * @param float $amount
@@ -26,8 +25,7 @@ final class PaypalPaymentProcessorAdapter implements PaymentProcessorInterface
             $this->paypalProcessor->pay($priceInCents);
             return true;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            $this->logger->error($e->getTraceAsString());
+            $this->logger->error("Payment failed: " . $e->getMessage());
             return false;
         }
     }

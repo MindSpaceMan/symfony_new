@@ -1,18 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Payment;
+namespace App\Service\Payment;
 
 use Psr\Log\LoggerInterface;
 use Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor;
 
 final class StripePaymentProcessorAdapter implements PaymentProcessorInterface
 {
-    private LoggerInterface $logger;
-    public function __construct(private StripePaymentProcessor $stripeProcessor, LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
+    public function __construct(private readonly StripePaymentProcessor $stripeProcessor,
+                                private readonly LoggerInterface $logger)
+    {}
 
     /**
      * @param float $amount
@@ -23,11 +21,13 @@ final class StripePaymentProcessorAdapter implements PaymentProcessorInterface
         $priceInCents = (int) round($amount * 100);
 
         try {
-            $this->stripeProcessor->processPayment($priceInCents);
-            return true;
+            $success = $this->stripeProcessor->processPayment($amount);
+            if (!$success) {
+                $this->logger->error("Stripe Payment failed: Transaction declined.");
+            }
+            return $success;
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            $this->logger->error($e->getTraceAsString());
+            $this->logger->error("Payment failed: " . $e->getMessage());
             return false;
         }
     }

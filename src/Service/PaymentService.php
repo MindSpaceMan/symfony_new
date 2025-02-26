@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Payment\PaymentProcessorInterface;
+use App\Service\Payment\PaymentProcessorInterface;
 
 final class PaymentService
 {
@@ -11,7 +11,7 @@ final class PaymentService
     {
     }
 
-    public function pay(float $amount): bool
+    public function pay(int $amount): bool
     {
         return $this->paymentProcessor->pay($amount);
     }

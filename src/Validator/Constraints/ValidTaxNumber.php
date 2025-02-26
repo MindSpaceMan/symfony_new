@@ -9,8 +9,14 @@ use Symfony\Component\Validator\Constraint;
 #[Attribute]
 class ValidTaxNumber extends Constraint
 {
-    public string $message = 'Неверный формат налогового номера: "{{ value }}"';
+    public readonly string $message;
 
+    public function __construct(string $message = 'Неверный формат налогового номера: "{{ value }}"')
+    {
+        parent::__construct($message);
+
+        $this->message = $message;
+    }
     public function validatedBy(): string
     {
         return static::class.'Validator';

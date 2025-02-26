@@ -21,13 +21,7 @@ class ValidTaxNumberValidator extends ConstraintValidator
             '/^FR[a-zA-Z]{2}\d{9}$/' // France
         ];
 
-        $valid = false;
-        foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $value)) {
-                $valid = true;
-                break;
-            }
-        }
+        $valid = !empty(array_filter($patterns, fn($pattern) => preg_match($pattern, $value)));
 
         if (!$valid) {
             $this->context->buildViolation($constraint->message)

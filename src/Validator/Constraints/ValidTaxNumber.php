@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
 
-// ValidTaxNumber.php
 namespace App\Validator\Constraints;
 
+use Attribute;
 use Symfony\Component\Validator\Constraint;
 
-#[\Attribute]
+#[Attribute]
 class ValidTaxNumber extends Constraint
 {
     public string $message = 'Неверный формат налогового номера: "{{ value }}"';

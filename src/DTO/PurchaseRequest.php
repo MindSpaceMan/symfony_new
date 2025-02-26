@@ -1,12 +1,13 @@
 <?php
+declare(strict_types=1);
 
-// PurchaseRequest.php
 namespace App\DTO;
 
+use App\Enum\PaymentProcessor;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints\ValidTaxNumber;
 
-class PurchaseRequest
+final class PurchaseRequest
 {
     #[Assert\NotBlank]
     #[Assert\Type('integer')]
@@ -20,7 +21,7 @@ class PurchaseRequest
     private ?string $couponCode = null;
 
     #[Assert\NotBlank]
-    #[Assert\Choice(choices: ['paypal', 'stripe'], message: 'Unknown payment processor')]
+    #[Assert\Choice(callback: [PaymentProcessor::class, 'values'], message: 'Unknown payment processor')]
     private string $paymentProcessor;
 
     public function getProduct(): int
@@ -28,19 +29,9 @@ class PurchaseRequest
         return $this->product;
     }
 
-    public function setProduct(int $product): void
-    {
-        $this->product = $product;
-    }
-
     public function getTaxNumber(): string
     {
         return $this->taxNumber;
-    }
-
-    public function setTaxNumber(string $taxNumber): void
-    {
-        $this->taxNumber = $taxNumber;
     }
 
     public function getCouponCode(): ?string
@@ -48,18 +39,8 @@ class PurchaseRequest
         return $this->couponCode;
     }
 
-    public function setCouponCode(?string $couponCode): void
-    {
-        $this->couponCode = $couponCode;
-    }
-
     public function getPaymentProcessor(): string
     {
         return $this->paymentProcessor;
-    }
-
-    public function setPaymentProcessor(string $paymentProcessor): void
-    {
-        $this->paymentProcessor = $paymentProcessor;
     }
 }

@@ -1,25 +1,23 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Entity\Product;
 use App\Entity\Coupon;
 
-class PriceCalculator
+final class PriceCalculator
 {
     public function calculatePrice(Product $product, ?Coupon $coupon, string $taxNumber): float
     {
         $basePrice = $product->getPrice();
 
-        // Применить купон, если есть
         if ($coupon) {
             $basePrice = $this->applyCoupon($basePrice, $coupon);
         }
 
-        // Определить налог
         $taxRate = $this->getTaxRate($taxNumber);
 
-        // Прибавить налог
         $finalPrice = $basePrice + ($basePrice * $taxRate);
 
         return round($finalPrice, 2);
@@ -29,7 +27,7 @@ class PriceCalculator
     {
         if ($coupon->getDiscountType() === 'fixed') {
             return max(0, $price - $coupon->getValue());
-        } else { // 'percent'
+        } else {
             return $price * (1 - $coupon->getValue() / 100);
         }
     }

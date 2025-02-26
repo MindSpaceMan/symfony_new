@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
 
-// CalculatePriceRequest.php
 namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints\ValidTaxNumber;
 
-class CalculatePriceRequest
+final class CalculatePriceRequest
 {
     #[Assert\NotBlank]
     #[Assert\Type('integer')]

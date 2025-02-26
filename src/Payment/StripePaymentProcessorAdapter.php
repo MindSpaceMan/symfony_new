@@ -1,30 +1,33 @@
 <?php
+declare(strict_types=1);
 
-// src/Payment/StripePaymentProcessorAdapter.php
 namespace App\Payment;
 
+use Psr\Log\LoggerInterface;
 use Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor;
 
-class StripePaymentProcessorAdapter implements PaymentProcessorInterface
+final class StripePaymentProcessorAdapter implements PaymentProcessorInterface
 {
-    public function __construct(private StripePaymentProcessor $stripeProcessor)
+    private LoggerInterface $logger;
+    public function __construct(private StripePaymentProcessor $stripeProcessor, LoggerInterface $logger)
     {
+        $this->logger = $logger;
     }
 
     /**
-     * @param float $amount Сумма в условных единицах (например, евро)
-     * @return bool true, если оплата прошла успешно, false — если выброшено исключение
+     * @param float $amount
+     * @return bool true, если оплата успешно, false — если исключение
      */
     public function pay(float $amount): bool
     {
-        // Вендорский класс принимает сумму в "центах" как int
         $priceInCents = (int) round($amount * 100);
 
         try {
             $this->stripeProcessor->processPayment($priceInCents);
-            return true; // Если не было исключения
+            return true;
         } catch (\Exception $e) {
-            // Можно залогировать ошибку
+            $this->logger->error($e->getMessage());
+            $this->logger->error($e->getTraceAsString());
             return false;
         }
     }

@@ -1,6 +1,6 @@
 <?php
+declare(strict_types=1);
 
-// ValidTaxNumberValidator.php
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;

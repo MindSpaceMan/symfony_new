@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
-// src/Service/PaymentService.php
 namespace App\Service;
 
 use App\Payment\PaymentProcessorInterface;
 
-class PaymentService
+final class PaymentService
 {
     public function __construct(private readonly PaymentProcessorInterface $paymentProcessor)
     {

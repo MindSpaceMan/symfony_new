@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Service;
 
 use App\Service\Payment\PaymentProcessorInterface;
-use App\Service\PaymentService;
+use App\Service\Payment\PaymentService;
 use PHPUnit\Framework\TestCase;
 
 class PaymentServiceTest extends TestCase

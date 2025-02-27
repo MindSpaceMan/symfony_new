@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Service;
-
-use App\Service\Payment\PaymentProcessorInterface;
+namespace App\Service\Payment;
 
 final class PaymentService
 {

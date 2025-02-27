@@ -26,23 +26,29 @@ services:
     Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor: ~
     Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor: ~
 
-    App\Payment\PaypalPaymentProcessorAdapter:
+    App\Service\Payment\PaypalPaymentProcessorAdapter:
         arguments:
             $paypalProcessor: '@Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor'
 
-    App\Payment\StripePaymentProcessorAdapter:
+    App\Service\Payment\StripePaymentProcessorAdapter:
         arguments:
             $stripeProcessor: '@Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor'
 
-    App\Service\PaymentService $paymentServicePaypal:
-        class: App\Service\PaymentService
+    App\Service\Payment\PaymentService\Paypal:
+        class: App\Service\Payment\PaymentService
         arguments:
-            $paymentProcessor: '@App\Payment\PaypalPaymentProcessorAdapter'
+            $paymentProcessor: '@App\Service\Payment\PaypalPaymentProcessorAdapter'
 
-    App\Service\PaymentService $paymentServiceStripe:
-        class: App\Service\PaymentService
+    App\Service\Payment\PaymentService\Stripe:
+        class: App\Service\Payment\PaymentService
         arguments:
-            $paymentProcessor: '@App\Payment\StripePaymentProcessorAdapter'
+            $paymentProcessor: '@App\Service\Payment\StripePaymentProcessorAdapter'
+
+    # Конфигурируем фабрику, которая получает конкретные экземпляры
+    App\Service\Payment\PaymentProcessorFactory:
+        arguments:
+            $paymentServicePaypal: '@App\Service\Payment\PaymentService\Paypal'
+            $paymentServiceStripe: '@App\Service\Payment\PaymentService\Stripe'
 
     # PriceCalculator
     App\Service\PriceCalculator: ~

@@ -18,10 +18,10 @@ final class StripePaymentProcessorAdapter implements PaymentProcessorInterface
      */
     public function pay(float $amount): bool
     {
-        $priceInCents = (int) round($amount * 100);
+        $priceInCents = (int) $amount;
 
         try {
-            $success = $this->stripeProcessor->processPayment($amount);
+            $success = $this->stripeProcessor->processPayment($priceInCents);
             if (!$success) {
                 $this->logger->error("Stripe Payment failed: Transaction declined.");
             }

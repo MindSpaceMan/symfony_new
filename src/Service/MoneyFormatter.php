@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Brick\Money\Money;
+use Brick\Math\BigDecimal;
 
 final class MoneyFormatter
 {
     /**
      * Форматирует `Money` в `float`
      */
-    public function format(Money $money): float
+    public function format(BigDecimal $money): float
     {
-        return $money->getAmount()->toFloat();
+        return $money->toFloat();
     }
 }

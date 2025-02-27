@@ -19,7 +19,7 @@ final class PaypalPaymentProcessorAdapter implements PaymentProcessorInterface
      */
     public function pay(float $amount): bool
     {
-        $priceInCents = (int) round($amount * 100);
+        $priceInCents = (int) $amount;
 
         try {
             $this->paypalProcessor->pay($priceInCents);

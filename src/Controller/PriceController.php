@@ -7,17 +7,17 @@ use App\DTO\CalculatePriceRequest;
 use App\DTO\PurchaseRequest;
 use App\Repository\CouponRepository;
 use App\Repository\ProductRepository;
-use App\Service\PaymentService;
-use App\Service\PriceCalculator;
 use App\Service\CouponService;
 use App\Service\MoneyFormatter;
-use OpenApi\Annotations as OA;
+use App\Service\Payment\PaymentProcessorFactory;
+use App\Service\PriceCalculator;
+use Brick\Math\Exception\DivisionByZeroException;
+use Brick\Math\Exception\MathException;
+use Brick\Math\Exception\NumberFormatException;
+use Brick\Math\Exception\RoundingNecessaryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Brick\Money\Money;
-use Brick\Math\RoundingMode;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 
 class PriceController extends AbstractController
 {
@@ -48,6 +48,12 @@ class PriceController extends AbstractController
         );
     }
 
+    /**
+     * @throws RoundingNecessaryException
+     * @throws DivisionByZeroException
+     * @throws MathException
+     * @throws NumberFormatException
+     */
     #[Route('/purchase', methods: ['POST'])]
     public function purchase(
         #[MapRequestPayload] PurchaseRequest $dto,
@@ -66,7 +72,7 @@ class PriceController extends AbstractController
 
         $paymentService = $paymentProcessorFactory->getProcessor($dto->paymentProcessor);
 
-        if (!$paymentService->pay($finalPrice->getAmount()->toInt())) {
+        if (!$paymentService->pay($finalPrice->toInt())) {
             return $this->json(['errors' => ['payment' => 'Payment failed']], 422);
         }
 

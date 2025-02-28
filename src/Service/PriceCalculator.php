@@ -75,15 +75,15 @@ final class PriceCalculator
     private function applyFixedDiscount(BigDecimal $price, int $discountValue): BigDecimal
     {
         $result = $price->minus(BigDecimal::of($discountValue));
-        // Гарантируем, что итоговая цена не опустится ниже 1 (т.е. 0.01 евро)
-        return $result->isLessThan(BigDecimal::of(1)) ? BigDecimal::of(1) : $result;
+        // Если результат меньше 0, возвращаем 0.
+        return $result->isLessThan(BigDecimal::of(0)) ? BigDecimal::of(0) : $result;
     }
 
     /**
      * Применяет процентную скидку, гарантируя, что процент ≤ 100%.
      *
      * @param BigDecimal $price Базовая цена в минорных единицах.
-     * @param int $discountValue Процент скидки (целое число от 0 до 100).
+     * @param int $discountValue Скидка в базисных пунктах (например, 1000 = 10%, 10000 = 100%).
      *
      * @return BigDecimal
      * @throws DivisionByZeroException
@@ -93,16 +93,16 @@ final class PriceCalculator
      */
     private function applyPercentageDiscount(BigDecimal $price, int $discountValue): BigDecimal
     {
-        if ($discountValue > 100) {
+        if ($discountValue > 10000) {
             throw new DomainException("Discount percentage cannot be greater than 100%");
         }
 
-        // Вычисляем множитель: (1 - скидка/100)
+        // Вычисляем множитель: (1 - скидка/10000)
         $multiplier = BigDecimal::of(1)
-            ->minus(BigDecimal::of($discountValue)->dividedBy(100, 2));
+            ->minus(BigDecimal::of($discountValue)->dividedBy(10000, 2));
 
-        $result = $price->multipliedBy($multiplier, RoundingMode::HALF_UP);
-        return $result->isLessThan(BigDecimal::of(1)) ? BigDecimal::of(1) : $result;
+        $result = $price->multipliedBy($multiplier);
+        return $result->isLessThan(BigDecimal::of(0)) ? BigDecimal::of(0) : $result;
     }
 
     /**
@@ -110,14 +110,18 @@ final class PriceCalculator
      */
     private function getTaxRate(string $taxNumber): BigDecimal
     {
-        $prefix = substr($taxNumber, 0, 2);
+        // Если формат налогового номера некорректный, выбрасываем исключение.
+        if (!preg_match('/^[A-Z]{2}\d+$/', $taxNumber)) {
+            throw new DomainException("Unknown tax number format: {$taxNumber}");
+        }
 
+        $prefix = substr($taxNumber, 0, 2);
         return match ($prefix) {
             'DE' => BigDecimal::of('0.19'),
             'IT' => BigDecimal::of('0.22'),
             'FR' => BigDecimal::of('0.20'),
             'GR' => BigDecimal::of('0.24'),
-            default => throw new DomainException("Unknown tax number prefix: {$prefix}"),
+            default => BigDecimal::of(0),
         };
     }
 }

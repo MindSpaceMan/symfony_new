@@ -21,10 +21,10 @@ class PaymentServiceTest extends TestCase
     {
         $this->processorMock
             ->method('pay')
-            ->with($this->equalTo(99.99)) // ✅ Проверяем, что передаётся float
+            ->with($this->equalTo(9999))
             ->willReturn(true);
 
-        $result = $this->service->pay(99.99);
+        $result = $this->service->pay(9999);
 
         $this->assertTrue($result);
     }
@@ -35,7 +35,7 @@ class PaymentServiceTest extends TestCase
             ->method('pay')
             ->willReturn(false);
 
-        $result = $this->service->pay(100.0);
+        $result = $this->service->pay(10000);
 
         $this->assertFalse($result);
     }
@@ -46,8 +46,9 @@ class PaymentServiceTest extends TestCase
             ->method('pay')
             ->willThrowException(new \Exception('Payment error'));
 
-        $result = $this->service->pay(50.0);
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Payment error');
 
-        $this->assertFalse($result, 'Сервис должен вернуть false при исключении.');
+        $this->service->pay(5000);
     }
 }

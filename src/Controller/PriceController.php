@@ -18,6 +18,7 @@ use Brick\Math\Exception\RoundingNecessaryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use OpenApi\Attributes as OA;
 
 class PriceController extends AbstractController
 {
@@ -27,6 +28,25 @@ class PriceController extends AbstractController
         private readonly PriceCalculator $priceCalculator,
     ) {}
 
+    #[OA\Post(
+        path: '/calculate-price',
+        summary: 'Рассчитывает цену продукта с учетом купона и налога',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['product', 'taxNumber'],
+                properties: [
+                    new OA\Property(property: 'product', type: 'integer', example: 1),
+                    new OA\Property(property: 'taxNumber', type: 'string', example: 'DE123456789'),
+                    new OA\Property(property: 'couponCode', type: 'string', example: 'D15')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Цена успешно рассчитана'),
+            new OA\Response(response: 422, description: 'Неверные входные данные')
+        ]
+    )]
     #[Route('/calculate-price', methods: ['POST'])]
     public function calculatePrice(
         #[MapRequestPayload] CalculatePriceRequest $dto,
@@ -54,6 +74,26 @@ class PriceController extends AbstractController
      * @throws MathException
      * @throws NumberFormatException
      */
+    #[OA\Post(
+        path: '/purchase',
+        summary: 'Осуществляет покупку продукта с проведением оплаты',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['product', 'taxNumber', 'paymentProcessor'],
+                properties: [
+                    new OA\Property(property: 'product', type: 'integer', example: 1),
+                    new OA\Property(property: 'taxNumber', type: 'string', example: 'IT12345678900'),
+                    new OA\Property(property: 'couponCode', type: 'string', example: 'D15'),
+                    new OA\Property(property: 'paymentProcessor', type: 'string', example: 'paypal')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Покупка успешно завершена'),
+            new OA\Response(response: 422, description: 'Ошибка оплаты или неверные входные данные')
+        ]
+    )]
     #[Route('/purchase', methods: ['POST'])]
     public function purchase(
         #[MapRequestPayload] PurchaseRequest $dto,

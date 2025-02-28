@@ -9,8 +9,8 @@ final class PaymentService
     {
     }
 
-    public function pay(int $amount): bool
+    public function pay(int $priceInCents): bool
     {
-        return $this->paymentProcessor->pay($amount);
+        return $this->paymentProcessor->pay($priceInCents);
     }
 }

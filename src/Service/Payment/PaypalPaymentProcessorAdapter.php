@@ -14,12 +14,11 @@ final class PaypalPaymentProcessorAdapter implements PaymentProcessorInterface
     {}
 
     /**
-     * @param float $amount
+     * @param int $priceInCents
      * @return bool true, если оплата успешно, false — если исключение
      */
-    public function pay(float $amount): bool
+    public function pay(int $priceInCents): bool
     {
-        $priceInCents = (int) $amount;
 
         try {
             $this->paypalProcessor->pay($priceInCents);

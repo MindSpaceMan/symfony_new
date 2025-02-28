@@ -11,8 +11,8 @@ final class MoneyFormatter
     /**
      * Форматирует `Money` в `float`
      */
-    public function format(BigDecimal $money): float
+    public function format(BigDecimal $money): int
     {
-        return $money->toFloat();
+        return $money->toInt();
     }
 }

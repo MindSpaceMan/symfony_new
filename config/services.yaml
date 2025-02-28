@@ -50,6 +50,4 @@ services:
             $paymentServicePaypal: '@App\Service\Payment\PaymentService\Paypal'
             $paymentServiceStripe: '@App\Service\Payment\PaymentService\Stripe'
 
-    # PriceCalculator
-    App\Service\PriceCalculator: ~
 

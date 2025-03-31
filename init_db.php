@@ -36,7 +36,29 @@ CREATE TABLE IF NOT EXISTS confirmation_codes (
 );
 SQL;
 
+$sqlPendingPhones = <<<SQL
+CREATE TABLE IF NOT EXISTS pending_phones (
+    id SERIAL PRIMARY KEY,
+    phone_number VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+SQL;
+
+$sqlUserPhones = <<<SQL
+CREATE TABLE IF NOT EXISTS user_phones (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    phone_number VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    confirmed_at TIMESTAMP DEFAULT NULL
+);
+SQL;
+
+
+
 $conn->executeStatement($sqlUsers);
 $conn->executeStatement($sqlCodes);
+$conn->executeStatement($sqlPendingPhones);
+$conn->executeStatement($sqlUserPhones);
 
 echo "Таблицы созданы (если их ещё не было).\n";

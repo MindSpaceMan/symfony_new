@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Model\ConfirmationCode;
 use App\Repository\ConfirmationCodeRepository;
+use App\Repository\PendingPhoneRepository;
+use App\Repository\UserRepository;
 
 class SmsCodeService
 {
@@ -12,7 +14,9 @@ class SmsCodeService
     private const BLOCK_DURATION = 60;      // блокируем на 60 минут (пример)
 
     public function __construct(
-        private ConfirmationCodeRepository $confirmationCodeRepo
+        private ConfirmationCodeRepository $confirmationCodeRepo,
+        private UserRepository $userRepository,
+        private PendingPhoneRepository $pendingPhoneRepository,
     ) {
     }
 
@@ -22,6 +26,15 @@ class SmsCodeService
      */
     public function generateConfirmationCode(string $phoneNumber): ConfirmationCode
     {
+        $user = $this->userRepository->findByPhoneNumber($phoneNumber);
+
+        if (!$user) {
+            // нет пользователя => смотрим, есть ли запись в pending_phones
+            if (!$this->pendingPhoneRepository->findPhoneNumber($phoneNumber)) {
+                $this->pendingPhoneRepository->addPhoneNumber($phoneNumber);
+            }
+        }
+
         // 1. Проверяем, не превысил ли пользователь лимит 3 кодов за 10-15 минут
         $recentCount = $this->confirmationCodeRepo->countRecentCodes($phoneNumber, self::BLOCK_INTERVAL_MIN);
         if ($recentCount >= self::BLOCK_LIMIT) {
@@ -62,6 +75,17 @@ class SmsCodeService
         // Ставим флаг "is_used", чтобы нельзя было использовать код многократно
         $code->markUsed();
         $this->confirmationCodeRepo->save($code);
+
+        // 3. Проверяем, есть ли уже пользователь
+        $user = $this->userRepository->findByPhoneNumber($phoneNumber);
+        if (!$user) {
+            // Нет — создаём
+            $user = User::createFromPhoneNumber($phoneNumber);
+            $this->userRepository->save($user);
+
+            // 4. Удаляем запись из pending_phones
+            $this->pendingPhoneRepository->removePhoneNumber($phoneNumber);
+        }
 
         return true;
     }

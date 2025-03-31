@@ -23,31 +23,4 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor: ~
-    Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor: ~
-
-    App\Service\Payment\PaypalPaymentProcessorAdapter:
-        arguments:
-            $paypalProcessor: '@Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor'
-
-    App\Service\Payment\StripePaymentProcessorAdapter:
-        arguments:
-            $stripeProcessor: '@Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor'
-
-    App\Service\Payment\PaymentService\Paypal:
-        class: App\Service\Payment\PaymentService
-        arguments:
-            $paymentProcessor: '@App\Service\Payment\PaypalPaymentProcessorAdapter'
-
-    App\Service\Payment\PaymentService\Stripe:
-        class: App\Service\Payment\PaymentService
-        arguments:
-            $paymentProcessor: '@App\Service\Payment\StripePaymentProcessorAdapter'
-
-    # Конфигурируем фабрику, которая получает конкретные экземпляры
-    App\Service\Payment\PaymentProcessorFactory:
-        arguments:
-            $paymentServicePaypal: '@App\Service\Payment\PaymentService\Paypal'
-            $paymentServiceStripe: '@App\Service\Payment\PaymentService\Stripe'
-
 

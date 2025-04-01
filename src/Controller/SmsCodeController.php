@@ -10,8 +10,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class SmsCodeController
+class SmsCodeController extends AbstractController
 {
     public function __construct(
         private SmsCodeService $smsCodeService,
@@ -19,12 +20,12 @@ class SmsCodeController
         private ValidatorInterface $validator
     ) {}
 
+    #[Route('/api/request-code', name: 'request_code', methods: ['POST'])]
     /**
-     * @Route("/api/request-code", name="request_code", methods={"POST"})
      *
      * @OA\Post(
      *     path="/api/request-code",
-     *     summary="Request confirmation code",
+     *     summary="Запрос кода подтверждения",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -35,9 +36,9 @@ class SmsCodeController
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Code returned successfully"),
-     *     @OA\Response(response=429, description="Too many requests"),
-     *     @OA\Response(response=400, description="Invalid input")
+     *     @OA\Response(response=200, description="Код успешно возвращён"),
+     *     @OA\Response(response=429, description="Слишком много запросов (достигнут лимит)"),
+     *     @OA\Response(response=400, description="Некорректные входные данные")
      * )
      */
     public function requestCode(Request $request): JsonResponse
@@ -71,12 +72,11 @@ class SmsCodeController
         }
     }
 
+    #[Route('/api/verify-code', name: 'verify_code', methods: ['POST'])]
     /**
-     * @Route("/api/verify-code", name="verify_code", methods={"POST"})
-     *
      * @OA\Post(
      *     path="/api/verify-code",
-     *     summary="Verify confirmation code",
+     *     summary="Подтверждение кода",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -88,8 +88,9 @@ class SmsCodeController
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Successfully verified"),
-     *     @OA\Response(response=400, description="Invalid or expired code")
+     *     @OA\Response(response=200, description="Авторизация успешна"),
+     *     @OA\Response(response=201, description="Регистрация успешна"),
+     *     @OA\Response(response=400, description="Код неверный или истёк")
      * )
      */
     public function verifyCode(Request $request): JsonResponse
@@ -115,6 +116,7 @@ class SmsCodeController
 
         $user = $this->userRepository->findByPhoneNumber($phone);
 
+//        dd($user);
         return new JsonResponse([
             'status' => 'success',
             'message' => $user ? 'Вы успешно авторизовались' : 'Вы успешно зарегистрировались',

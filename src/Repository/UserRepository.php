@@ -18,6 +18,7 @@ class UserRepository
     public function save(User $user): void
     {
         if ($user->getId() === null) {
+            // INSERT
             $sql = sprintf(
                 'INSERT INTO %s (phone_number, name) VALUES (:phone_number, :name)',
                 $this->tableName
@@ -28,22 +29,24 @@ class UserRepository
                 'name'         => $user->getName(),
             ]);
 
-            // Получаем ID
+            // получаем id
             $id = (int)$this->connection->lastInsertId($this->tableName.'_id_seq');
-            // $user->setId($id); // Добавь setId() в User, если нужно
+            $user->setId($id); // <-- желательно добавить setId() в модель User
         } else {
+            // UPDATE БЕЗ phone_number
+            // то есть НЕ трогаем поле phone_number, предполагаем, что оно не меняется
             $sql = sprintf(
-                'UPDATE %s SET phone_number = :phone, name = :name WHERE id = :id',
+                'UPDATE %s SET name = :name WHERE id = :id',
                 $this->tableName
             );
 
             $this->connection->executeStatement($sql, [
-                'phone' => $user->getPhoneNumber(),
-                'name'  => $user->getName(),
-                'id'    => $user->getId(),
+                'name' => $user->getName(),
+                'id'   => $user->getId(),
             ]);
         }
     }
+
 
     public function findByPhoneNumber(string $phoneNumber): ?User
     {

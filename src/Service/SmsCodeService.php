@@ -6,6 +6,7 @@ use App\Model\ConfirmationCode;
 use App\Repository\ConfirmationCodeRepository;
 use App\Repository\PendingPhoneRepository;
 use App\Repository\UserRepository;
+use App\Model\User;
 
 class SmsCodeService
 {
@@ -26,20 +27,19 @@ class SmsCodeService
      */
     public function generateConfirmationCode(string $phoneNumber): ConfirmationCode
     {
-        $user = $this->userRepository->findByPhoneNumber($phoneNumber);
-
-        if (!$user) {
-            // нет пользователя => смотрим, есть ли запись в pending_phones
-            if (!$this->pendingPhoneRepository->findPhoneNumber($phoneNumber)) {
-                $this->pendingPhoneRepository->addPhoneNumber($phoneNumber);
-            }
+        // 1) Проверяем, не заблокирован ли уже пользователь
+        $isBlocked = $this->confirmationCodeRepo->isBlocked($phoneNumber);
+        if ($isBlocked) {
+            throw new \RuntimeException('Вы заблокированы на 1 час, попробуйте позже');
         }
 
-        // 1. Проверяем, не превысил ли пользователь лимит 3 кодов за 10-15 минут
+
+        // 2) Считаем, сколько кодов за последние X минут
         $recentCount = $this->confirmationCodeRepo->countRecentCodes($phoneNumber, self::BLOCK_INTERVAL_MIN);
         if ($recentCount >= self::BLOCK_LIMIT) {
-            // Допустим, блокируем на час. Можно хранить blocked_until, но упростим.
-            throw new \RuntimeException("Превышено кол-во попыток. Попробуйте через час.");
+            // Запоминаем время блокировки
+            $this->confirmationCodeRepo->addBlock($phoneNumber, new \DateTimeImmutable('+1 hour'));
+            throw new \RuntimeException('Превышено кол-во попыток. Блокировка на 1 час.');
         }
 
         // 2. Находим последний код

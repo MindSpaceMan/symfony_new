@@ -101,4 +101,31 @@ class ConfirmationCodeRepository
 
         return ConfirmationCode::fromArray($row);
     }
+
+    public function isBlocked(string $phoneNumber): bool
+    {
+        $sql = "SELECT MAX(blocked_until) AS blocked_until
+            FROM confirmation_codes
+            WHERE phone_number = :phone";
+
+        $row = $this->connection->fetchAssociative($sql, ['phone' => $phoneNumber]);
+        if (!$row || !$row['blocked_until']) {
+            return false;
+        }
+
+        $blockedUntil = new \DateTimeImmutable($row['blocked_until']);
+        return $blockedUntil > new \DateTimeImmutable();
+    }
+
+    public function addBlock(string $phoneNumber, \DateTimeInterface $blockedUntil): void
+    {
+        // Просто делаем INSERT новой записи
+        $sql = "INSERT INTO confirmation_codes (phone_number, created_at, blocked_until)
+            VALUES (:phone, NOW(), :blocked_until)";
+
+        $this->connection->executeStatement($sql, [
+            'phone' => $phoneNumber,
+            'blocked_until' => $blockedUntil->format('Y-m-d H:i:s'),
+        ]);
+    }
 }

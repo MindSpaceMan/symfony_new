@@ -12,7 +12,7 @@ $connectionParams = [
     'dbname'   => getenv('POSTGRES_DB') ?: 'ayder-computer',
     'user'     => getenv('POSTGRES_USER') ?: 'postgres',
     'password' => getenv('POSTGRES_PASSWORD') ?: 'postgres',
-    'host'     => getenv('POSTGRES_HOST') ?: '127.0.0.1',
+    'host'     => getenv('POSTGRES_HOST') ?: 'database',
     'driver'   => 'pdo_pgsql',
 ];
 
@@ -32,9 +32,16 @@ CREATE TABLE IF NOT EXISTS confirmation_codes (
     phone_number VARCHAR(255) NOT NULL,
     code VARCHAR(4) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    is_used BOOLEAN NOT NULL DEFAULT false
+    is_used BOOLEAN NOT NULL DEFAULT false,
+    blocked_until TIMESTAMP NULL
 );
 SQL;
+
+$sqlCodeNull = <<<SQL
+ALTER TABLE confirmation_codes
+    ALTER COLUMN code DROP NOT NULL;
+SQL;
+
 
 $sqlPendingPhones = <<<SQL
 CREATE TABLE IF NOT EXISTS pending_phones (
@@ -58,6 +65,7 @@ SQL;
 
 $conn->executeStatement($sqlUsers);
 $conn->executeStatement($sqlCodes);
+$conn->executeStatement($sqlCodeNull);
 $conn->executeStatement($sqlPendingPhones);
 $conn->executeStatement($sqlUserPhones);
 

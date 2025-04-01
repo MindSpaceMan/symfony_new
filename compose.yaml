@@ -26,6 +26,8 @@ services:
       - .:/app:rw
     environment:
       - APP_ENV=dev
+      - XDEBUG_CLIENT_HOST="host.docker.internal"
+      - XDEBUG_IDEKEY="PHPSTORM"
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:

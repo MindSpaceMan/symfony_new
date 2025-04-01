@@ -9,10 +9,10 @@ use Symfony\Component\Dotenv\Dotenv;
 (new Dotenv())->bootEnv(__DIR__.'/.env');
 
 $connectionParams = [
-    'dbname'   => getenv('POSTGRES_DB') ?: 'app',
-    'user'     => getenv('POSTGRES_USER') ?: 'app',
-    'password' => getenv('POSTGRES_PASSWORD') ?: '!ChangeMe!',
-    'host'     => getenv('POSTGRES_HOST') ?: 'database',
+    'dbname'   => getenv('POSTGRES_DB') ?: 'ayder-computer',
+    'user'     => getenv('POSTGRES_USER') ?: 'postgres',
+    'password' => getenv('POSTGRES_PASSWORD') ?: 'postgres',
+    'host'     => getenv('POSTGRES_HOST') ?: '127.0.0.1',
     'driver'   => 'pdo_pgsql',
 ];
 

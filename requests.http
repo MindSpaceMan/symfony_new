@@ -1,0 +1,66 @@
+### ✅ Успешный запрос кода (новый номер)
+POST http://localhost:8337/api/request-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999"
+}
+
+### 🔁 Повторный запрос кода (меньше 1 минуты)
+POST http://localhost:8337/api/request-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999"
+}
+
+### 🚫 Превышен лимит (3 запроса за 15 мин)
+POST http://localhost:8337/api/request-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999"
+}
+
+### ❌ Невалидный телефон
+POST http://localhost:8337/api/request-code
+Content-Type: application/json
+
+{
+  "phone": ""
+}
+
+### ✅ Успешная верификация (новый пользователь)
+POST http://localhost:8337/api/verify-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999",
+  "code": "1234"
+}
+
+### ✅ Успешная верификация (существующий пользователь)
+POST http://localhost:8337/api/verify-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999",
+  "code": "1234"
+}
+
+### ❌ Неверный код
+POST http://localhost:8337/api/verify-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999",
+  "code": "0000"
+}
+
+### ❌ Пропущены поля
+POST http://localhost:8337/api/verify-code
+Content-Type: application/json
+
+{
+  "phone": "+79999999999"
+}

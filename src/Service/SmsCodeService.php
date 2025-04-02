@@ -12,7 +12,7 @@ class SmsCodeService
 {
     private const BLOCK_LIMIT = 3;          // 3 кода
     private const BLOCK_INTERVAL_MIN = 15;  // за последние 15 минут
-    private const BLOCK_DURATION = 60;      // блокируем на 60 минут (пример)
+    private const BLOCK_DURATION = 60;      // блокируем на 60 минут
 
     public function __construct(
         private ConfirmationCodeRepository $confirmationCodeRepo,

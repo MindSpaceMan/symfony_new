@@ -95,10 +95,14 @@ class SmsCodeController extends AbstractController
      */
     public function verifyCode(Request $request): JsonResponse
     {
+
         $data = json_decode($request->getContent(), true);
 
         $phone = $data['phone'] ?? null;
         $code  = $data['code'] ?? null;
+
+        // Сначала проверяем, существует ли пользователь
+        $existingUser = $this->userRepository->findByPhoneNumber($phone);
 
         if (!$phone || !$code) {
             return new JsonResponse([
@@ -114,13 +118,10 @@ class SmsCodeController extends AbstractController
             ], 400);
         }
 
-        $user = $this->userRepository->findByPhoneNumber($phone);
-
-//        dd($user);
         return new JsonResponse([
             'status' => 'success',
-            'message' => $user ? 'Вы успешно авторизовались' : 'Вы успешно зарегистрировались',
-            'user_id' => $user?->getId(),
-        ], $user ? 200 : 201);
+            'message' => $existingUser ? 'Вы успешно авторизовались' : 'Вы успешно зарегистрировались',
+            'user_id' => $existingUser?->getId(),
+        ], $existingUser ? 201 : 200);
     }
 }

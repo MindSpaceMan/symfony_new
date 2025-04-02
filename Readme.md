@@ -120,3 +120,6 @@ Feel free to ping me at [your.email@domain.com] or open issues if anything’s u
 ## 📘 License
 
 MIT
+Запустить - make init
+php init_db.php
+смотреть файл requests.http или просто через постман тестировать.
